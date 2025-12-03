@@ -427,6 +427,10 @@ dev = [
     { name = "setuptools" },
     { name = "wemake-python-styleguide" },
 ]
+setup = [
+    { name = "click" },
+    { name = "rich" },
+]
 
 [package.metadata]
 requires-dist = [
@@ -465,6 +469,10 @@ dev = [
     { name = "ruff", specifier = ">=0.8.5,<0.9.0" },
     { name = "setuptools", specifier = ">=75.6.0,<76.0.0" },
     { name = "wemake-python-styleguide", specifier = ">=1.0.0,<2.0.0" },
+]
+setup = [
+    { name = "click", specifier = ">=8.1" },
+    { name = "rich", specifier = ">=13.0" },
 ]
 
 [[package]]

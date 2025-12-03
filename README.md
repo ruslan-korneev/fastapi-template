@@ -40,7 +40,28 @@ A production-ready FastAPI template with SQLAlchemy, dependency injection, Sentr
 
 ## Quick Start
 
-### 1. Setup Environment
+### Option 1: Interactive Setup (Recommended)
+
+```bash
+git clone <repository-url>
+cd fastapi-template
+
+# Install dependencies including setup tool
+uv venv
+source .venv/bin/activate
+uv sync --all-groups --group setup
+
+# Run interactive setup wizard
+uv run setup-project
+```
+
+The setup wizard will:
+- Configure project name, description, and author
+- Set up database connection
+- Choose CI/CD platform (GitHub Actions, GitLab CI, or none)
+- Update all configuration files automatically
+
+### Option 2: Manual Setup
 
 ```bash
 git clone <repository-url>
@@ -52,7 +73,7 @@ source .venv/bin/activate
 uv sync --all-groups
 ```
 
-### 2. Configure Database
+Configure database:
 
 ```bash
 cp .env.example .env
@@ -65,7 +86,7 @@ Run database migrations:
 uv run alembic upgrade head
 ```
 
-### 3. Start API Server
+### Start API Server
 
 ```bash
 uv run uvicorn main:app --host 0.0.0.0 --port 8000
@@ -327,6 +348,20 @@ Build and run with Docker:
 docker build -t fastapi-template .
 docker run -p 8000:8000 --env-file .env fastapi-template
 ```
+
+## Removing Setup Tool
+
+After running the setup wizard, you can remove the setup tool:
+
+```bash
+rm -rf setup_project/
+```
+
+Then remove from `pyproject.toml`:
+- The `setup` group from `[dependency-groups]`
+- The `setup-project` line from `[project.scripts]`
+
+Finally, run `uv sync` to update the lock file.
 
 ## License
 

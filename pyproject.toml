@@ -44,6 +44,13 @@ dev = [
     "wemake-python-styleguide (>=1.0.0,<2.0.0)",
     "pre-commit>=4.2.0",
 ]
+setup = [
+    "click>=8.1",
+    "rich>=13.0",
+]
+
+[project.scripts]
+setup-project = "setup_project.cli:main"
 
 [project.entry-points."flake8.extension"]
 WPS = "wemake_python_styleguide.checker:Checker"
@@ -100,6 +107,11 @@ external = [ "WPS" ]
   "S404", # subprocess calls are for tests
   "S603", # do not require `shell=True`
   "S607", # partial executable paths
+]
+"setup_project/*.py" = [
+  "S603", # subprocess calls are for setup tool
+  "S607", # partial executable paths
+  "FBT001", # click uses boolean positional args
 ]
 
 [tool.ruff.lint.flake8-bugbear]
