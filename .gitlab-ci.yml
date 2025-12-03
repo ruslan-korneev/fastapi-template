@@ -1,0 +1,62 @@
+stages:
+  - test
+  - build
+
+.postgres-extras:
+  variables:
+    POSTGRES_HOST: postgres
+    POSTGRES_PORT: 5432
+    POSTGRES_DB: postgres
+    POSTGRES_USERNAME: postgres
+    POSTGRES_PASSWORD: secret
+
+    DB__HOST: postgres
+    DB__PORT: 5432
+    DB__NAME: postgres
+    DB__USERNAME: postgres
+    DB__PASSWORD: secret
+  services:
+    - postgres:17
+
+.python-extras:
+  variables:
+    UV_VERSION: 0.9
+    PYTHON_VERSION: 3.13
+    BASE_LAYER: bookworm-slim
+    UV_LINK_MODE: copy
+
+test:
+  stage: test
+  image: ghcr.io/astral-sh/uv:$UV_VERSION-python$PYTHON_VERSION-$BASE_LAYER
+  tags:
+    - docker
+  extends:
+    - .postgres-extras
+    - .python-extras
+  before_script:
+    - apt-get update && apt-get install -y build-essential
+  script:
+    - make ci
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
+
+build:
+  stage: build
+  tags:
+    - docker
+  image: docker:24.0
+  services:
+    - name: docker:24.0-dind
+      alias: docker
+  before_script:
+    - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+  script:
+    - docker build -t $CI_REGISTRY_IMAGE:$TAG .
+    - docker push $CI_REGISTRY_IMAGE:$TAG
+  only:
+    - master
+  environment:
+    name: production

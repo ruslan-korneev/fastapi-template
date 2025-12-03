@@ -1,0 +1,150 @@
+[project]
+name = "fastapi-template"
+version = "1.0.0"
+description = "Production-ready FastAPI template with SQLAlchemy, DI, and comprehensive testing"
+authors = [
+    { name = "Ruslan Korneev", email = "admin@ruslan.beer" },
+]
+requires-python = ">=3.13.5,<4.0"
+readme = "README.md"
+dependencies = [
+    "fastapi[all] (>=0.115.6,<0.116.0)",
+    "uvicorn (>=0.34.0,<0.35.0)",
+    "sqlalchemy (>=2.0.36,<2.1.0)",
+    "alembic (>=1.14.0,<1.15.0)",
+    "asyncpg (>=0.30.0,<0.31.0)",
+    "pydantic (>=2.10.4,<3.0.0)",
+    "pydantic-settings (>=2.7.1,<3.0.0)",
+    "loguru (>=0.7.3,<0.8.0)",
+    "httpx (>=0.28.1,<0.29.0)",
+    "greenlet (>=3.1.1,<3.2.0)",
+    "dependency-injector (>=4.46.0,<5.0.0)",
+    "sentry-sdk[loguru] (>=2.22.0,<3.0.0)",
+]
+
+[dependency-groups]
+dev = [
+    "ipython (>=8.31.0,<9.0.0)",
+    "ruff (>=0.8.5,<0.9.0)",
+    "mypy (>=1.14.1,<2.0.0)",
+    "black (>=24.10.0,<25.0.0)",
+    "pytest-cov (>=6.0.0,<7.0.0)",
+    "pytest-xdist (>=3.6.1,<4.0.0)",
+    "pytest-freezegun (>=0.4.2,<0.5.0)",
+    "pytest-mock (>=3.14.0,<4.0.0)",
+    "pytest-env (==1.1.3)",
+    "setuptools (>=75.6.0,<76.0.0)",
+    "asyncpg-stubs (>=0.30.0,<0.31.0)",
+    "coverage-threshold (>=0.5.0,<1.0.0)",
+    "coverage (>=7.6.10,<8.0.0)",
+    "dotenv-linter (>=0.5.0,<1.0.0)",
+    "pytest (==8.3.4)",
+    "pytest-asyncio (>=0.25.2,<0.26.0)",
+    "pytest-httpx (>=0.35.0,<0.36.0)",
+    "wemake-python-styleguide (>=1.0.0,<2.0.0)",
+    "pre-commit>=4.2.0",
+]
+
+[project.entry-points."flake8.extension"]
+WPS = "wemake_python_styleguide.checker:Checker"
+
+[project.entry-points."flake8.report"]
+wemake = "wemake_python_styleguide.formatter:WemakeFormatter"
+
+[tool.hatch.build.targets.sdist]
+include = ["src"]
+
+[tool.hatch.build.targets.wheel]
+include = ["src"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.black]
+exclude = '''
+/(
+  | migrations
+  | .venv
+)/
+'''
+line_length = 120
+
+[tool.ruff]
+fix = true
+line-length = 120
+target-version = "py313"
+extend-exclude = [".venv", "venv", "migrations", "private"]
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "D",
+    "ANN",
+    "BLE001",
+    "FBT003",
+    "PLR0913",
+    "S101",
+    "COM812",
+    "ISC001",
+    "N806", # Variable `UpperCase` in function should be lowercase
+    "UP037",
+    "PGH003",
+]
+external = [ "WPS" ]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*.py" = [
+  "S101", # asserts
+  "S105", # hardcoded passwords
+  "S404", # subprocess calls are for tests
+  "S603", # do not require `shell=True`
+  "S607", # partial executable paths
+]
+
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = [
+    "fastapi.Depends",
+    "fastapi.params.Depends",
+    "fastapi.Query",
+    "fastapi.params.Query",
+]
+
+[tool.mypy]
+python_version = "3.13"
+plugins = ["sqlalchemy.ext.mypy.plugin"]
+exclude = ["migrations", "private"]
+warn_unused_configs = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unreachable = true
+warn_no_return = true
+namespace_packages = true
+explicit_package_bases = true
+disallow_untyped_defs = true
+disallow_untyped_calls = false
+strict = true
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = ["asyncpg", "asyncpg.exceptions"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+python_files = "tests_*.py test_*.py"
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+addopts = "--cov-report json --cov-report xml --cov-report term-missing:skip-covered --cov-branch  --cov=src --no-cov-on-fail --ignore=private/"
+filterwarnings = [
+    "ignore::DeprecationWarning:pytest_freezegun.*:",
+    "ignore::DeprecationWarning:pytest_asyncio.*:",
+    "ignore:coroutine 'AsyncMockMixin._execute_mock_call' was never awaited:RuntimeWarning",
+]
+
+[tool.coverage.run]
+parallel = true
+omit = ["**/tests/*", "src/core/*"]
+
+[tool.coverage-threshold]
+line_coverage_min = 80
+branch_coverage_min = 70
