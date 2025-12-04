@@ -1,1 +1,0 @@
-"""FastAPI Template Setup CLI."""

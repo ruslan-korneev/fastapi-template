@@ -21,7 +21,7 @@ stages:
 .python-extras:
   variables:
     UV_VERSION: 0.9
-    PYTHON_VERSION: 3.13
+    PYTHON_VERSION: {{ cookiecutter.python_version }}
     BASE_LAYER: bookworm-slim
     UV_LINK_MODE: copy
 

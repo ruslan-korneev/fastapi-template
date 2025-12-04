@@ -55,8 +55,8 @@ class Config(BaseSettings):
     logging_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
     environment: str = "development"
 
-    project_title: str = "FastAPI Template"
-    project_description: str = "Production-ready FastAPI template"
+    project_title: str = "{{ cookiecutter.project_title }}"
+    project_description: str = "{{ cookiecutter.project_description }}"
 
     db: DbSettings = DbSettings()
     sentry: SentrySettings = SentrySettings()
