@@ -1,0 +1,14 @@
+{
+    "project_name": "my-fastapi-project",
+    "project_slug": "{{ cookiecutter.project_name | lower | replace(' ', '-') | replace('_', '-') }}",
+    "project_slug_underscore": "{{ cookiecutter.project_slug | replace('-', '_') }}",
+    "project_title": "{{ cookiecutter.project_name | replace('-', ' ') | title }}",
+    "project_description": "Production-ready FastAPI application",
+    "author_name": "Your Name",
+    "author_email": "you@example.com",
+    "github_username": "",
+    "python_version": "3.13",
+    "db_name": "{{ cookiecutter.project_slug_underscore }}",
+    "ci_platform": ["github", "gitlab", "none"],
+    "license": ["MIT", "Apache-2.0", "BSD-3-Clause", "None"]
+}
