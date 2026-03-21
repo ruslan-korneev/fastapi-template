@@ -7,8 +7,9 @@
     "author_name": "Your Name",
     "author_email": "you@example.com",
     "github_username": "",
-    "python_version": "3.13",
+    "python_version": "3.14",
     "db_name": "{{ cookiecutter.project_slug_underscore }}",
     "ci_platform": ["github", "gitlab", "none"],
-    "license": ["MIT", "Apache-2.0", "BSD-3-Clause", "None"]
+    "license": ["MIT", "Apache-2.0", "BSD-3-Clause", "None"],
+    "_copy_without_render": []
 }

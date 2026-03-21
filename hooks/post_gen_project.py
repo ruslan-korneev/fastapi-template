@@ -77,6 +77,27 @@ def setup_project() -> None:
         print("  Dependencies installed successfully")
 
 
+def ask_about_plugins() -> None:
+    """Ask user if they want to explore plugins."""
+    print("\n" + "=" * 60)
+    print("Would you like to explore extra plugins?")
+    print("(Add modules, authentication, etc.)")
+    print("=" * 60)
+
+    try:
+        response = input("\nExplore plugins? [y/N]: ").strip().lower()
+    except (EOFError, KeyboardInterrupt):
+        response = "n"
+
+    if response == "y":
+        print("\nLaunching plugin system...")
+        try:
+            subprocess.run(["uv", "run", "plugins"], check=False)
+        except Exception as e:
+            print(f"  Warning: Could not launch plugins: {e}")
+            print("  You can run 'uv run plugins' later to add modules and features.")
+
+
 def print_next_steps() -> None:
     """Print next steps for the user."""
     print(f"""
@@ -103,6 +124,9 @@ Next steps:
   # Start the development server
   uv run uvicorn main:app --reload
 
+  # Add more modules/features anytime
+  uv run plugins
+
 Happy coding!
 """)
 
@@ -114,6 +138,7 @@ def main() -> None:
     cleanup_ci_files()
     cleanup_license()
     setup_project()
+    ask_about_plugins()
     print_next_steps()
 
 

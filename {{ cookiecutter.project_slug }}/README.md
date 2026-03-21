@@ -4,7 +4,7 @@
 [![codecov](https://codecov.io/gh/{{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }}/graph/badge.svg)](https://codecov.io/gh/{{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }})
 {% endif %}
 [![Python {{ cookiecutter.python_version }}+](https://img.shields.io/badge/python-{{ cookiecutter.python_version }}+-blue.svg)](https://www.python.org/downloads/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688.svg?logo=fastapi)](https://fastapi.tiangolo.com)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.135-009688.svg?logo=fastapi)](https://fastapi.tiangolo.com)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
 [![mypy](https://img.shields.io/badge/mypy-strict-blue.svg)](http://mypy-lang.org/)
@@ -18,7 +18,7 @@
 - **SQLAlchemy 2.0** with async sessions and PostgreSQL
 - **Alembic** for database migrations
 - **Pydantic v2** for data validation
-- **Dependency Injector** for IoC/DI container
+- **Dishka** for IoC/DI container
 - **Sentry** for error tracking
 - **Loguru** for structured logging with request ID tracking
 - **Comprehensive testing** with pytest, coverage requirements
@@ -133,7 +133,7 @@ make          # Run all checks (fmt, lint, db, test)
 src/
 ├── core/                  # Application core
 │   ├── api/               # Router aggregation with versioning
-│   ├── dependencies/      # DI setup (containers, db, http)
+│   ├── di/                # Dishka DI providers
 │   ├── exceptions.py      # Custom exception classes
 │   ├── middleware/        # Request ID, Rate limiting
 │   └── types/             # Base types (DTO, Repository, Pagination)
@@ -151,7 +151,6 @@ src/
 
 tests/
 ├── conftest.py            # Common fixtures
-├── mimic/                 # Test doubles (stubs, fakes, mocks)
 ├── benchmark/             # Performance tests
 ├── integration/           # API endpoint and database tests
 └── unit/                  # Unit tests
@@ -212,12 +211,18 @@ if user is None:
 
 ### Dependency Injection
 
-Using `dependency-injector` for managing application dependencies:
+Using [Dishka](https://dishka.readthedocs.io/) for managing application dependencies:
 
 ```python
-class Container(DeclarativeContainer):
-    wiring_config = WiringConfiguration(packages=["src"])
-    db_session_maker = providers.Factory(AsyncSessionMaker)
+from dishka.integrations.fastapi import DishkaRoute, FromDishka
+from sqlalchemy.ext.asyncio import AsyncSession
+
+router = APIRouter(route_class=DishkaRoute)
+
+@router.get("/{id}")
+async def get_item(id: UUID, session: FromDishka[AsyncSession]) -> ItemReadDTO:
+    repo = ItemRepository(session)
+    ...
 ```
 
 ## Adding a New Module

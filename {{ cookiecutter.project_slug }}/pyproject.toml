@@ -8,24 +8,24 @@ authors = [
 requires-python = ">={{ cookiecutter.python_version }},<4.0"
 readme = "README.md"
 dependencies = [
-    "fastapi[all] (>=0.115.6,<0.116.0)",
-    "uvicorn (>=0.34.0,<0.35.0)",
+    "fastapi[all] (>=0.135.0,<0.136.0)",
+    "uvicorn (>=0.34.0,<0.42.0)",
     "sqlalchemy (>=2.0.36,<2.1.0)",
-    "alembic (>=1.14.0,<1.15.0)",
-    "asyncpg (>=0.30.0,<0.31.0)",
+    "alembic (>=1.14.0,<1.19.0)",
+    "asyncpg (>=0.30.0,<0.32.0)",
     "pydantic (>=2.10.4,<3.0.0)",
     "pydantic-settings (>=2.7.1,<3.0.0)",
     "loguru (>=0.7.3,<0.8.0)",
     "httpx (>=0.28.1,<0.29.0)",
-    "greenlet (>=3.1.1,<3.2.0)",
-    "dependency-injector (>=4.46.0,<5.0.0)",
+    "greenlet (>=3.3.2,<4.0.0)",
+    "dishka (>=1.0,<2.0)",
     "sentry-sdk[loguru] (>=2.22.0,<3.0.0)",
 ]
 
 [dependency-groups]
 dev = [
     "ipython (>=8.31.0,<9.0.0)",
-    "ruff (>=0.8.5,<0.9.0)",
+    "ruff (>=0.14.0,<1.0.0)",
     "mypy (>=1.14.1,<2.0.0)",
     "black (>=24.10.0,<25.0.0)",
     "pytest-cov (>=6.0.0,<7.0.0)",
@@ -73,7 +73,7 @@ line_length = 120
 [tool.ruff]
 fix = true
 line-length = 120
-target-version = "py313"
+target-version = "py314"
 extend-exclude = [".venv", "venv", "migrations", "private"]
 
 [tool.ruff.lint]
@@ -90,16 +90,32 @@ ignore = [
     "N806", # Variable `UpperCase` in function should be lowercase
     "UP037",
     "PGH003",
+    "TC", # Python 3.14 PEP 649: deferred annotations make TYPE_CHECKING obsolete
 ]
 external = [ "WPS" ]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/*.py" = [
+"tests/**/*.py" = [
   "S101", # asserts
   "S105", # hardcoded passwords
+  "S106", # hardcoded password arguments
   "S404", # subprocess calls are for tests
   "S603", # do not require `shell=True`
   "S607", # partial executable paths
+  "PLR2004", # magic values in test assertions
+  "SLF001", # private member access needed for mocking
+  "FBT001", # boolean positional args in parametrized tests
+  "FBT002", # boolean default values in parametrized tests
+  "TC", # Python 3.14 PEP 649: deferred annotations break TYPE_CHECKING pattern
+  "ARG001", # unused @patch mock params must be accepted
+]
+
+[tool.ruff.lint.flake8-type-checking]
+runtime-evaluated-base-classes = [
+    "sqlalchemy.orm.DeclarativeBase",
+    "src.db.base.SAModel",
+    "pydantic.BaseModel",
+    "src.core.types.dto.BaseDTO",
 ]
 
 [tool.ruff.lint.flake8-bugbear]
@@ -111,7 +127,7 @@ extend-immutable-calls = [
 ]
 
 [tool.mypy]
-python_version = "3.13"
+python_version = "3.14"
 plugins = ["sqlalchemy.ext.mypy.plugin"]
 exclude = ["migrations", "private"]
 warn_unused_configs = true

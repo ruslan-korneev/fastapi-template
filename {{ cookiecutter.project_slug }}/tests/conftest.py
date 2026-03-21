@@ -1,5 +1,5 @@
 import asyncio
-from collections.abc import AsyncGenerator, Generator
+from collections.abc import AsyncGenerator, AsyncIterator, Generator
 from contextlib import suppress
 from typing import TYPE_CHECKING
 
@@ -10,6 +10,8 @@ import asyncpg
 import pytest
 import pytest_asyncio
 from _pytest.monkeypatch import MonkeyPatch
+from dishka import Provider, Scope, make_async_container, provide
+from dishka.integrations.fastapi import setup_dishka
 from httpx import ASGITransport, AsyncClient
 from pytest_httpx import HTTPXMock
 from sqlalchemy import Connection
@@ -17,10 +19,7 @@ from sqlalchemy.ext.asyncio import AsyncConnection, AsyncSession, create_async_e
 
 from src.config import settings
 from src.core.asgi import get_app
-from src.modules.users.dto import UserCreateDTO, UserReadDTO
-from src.modules.users.repositories import UserRepository
-from src.modules.users.services import UserService
-from tests.mimic.session import FakeSessionMaker
+from src.core.di import AppProvider
 
 if TYPE_CHECKING:
     from src.core.asgi import FastAPIWrapper
@@ -141,11 +140,27 @@ async def httpx_client(httpx_mock: HTTPXMock) -> AsyncGenerator[AsyncClient]:
         yield client
 
 
+class _TestRequestProvider(Provider):
+    """Override RequestProvider to use the test session with transaction rollback."""
+
+    scope = Scope.REQUEST
+
+    def __init__(self, test_session: AsyncSession) -> None:
+        super().__init__()
+        self._test_session = test_session
+
+    @provide
+    async def session(self) -> AsyncIterator[AsyncSession]:
+        yield self._test_session
+
+
 @pytest.fixture
 def test_app(session: AsyncSession) -> "FastAPIWrapper":
-    """Create app with overridden db_session_maker for test isolation."""
+    """Create app with overridden Dishka container for test isolation."""
     app = get_app()
-    app.container.db_session_maker.override(FakeSessionMaker(session))
+    # Replace the container with one that uses the test session
+    container = make_async_container(AppProvider(), _TestRequestProvider(session))
+    setup_dishka(container, app)
     return app
 
 
@@ -154,33 +169,11 @@ async def api_client(test_app: "FastAPIWrapper") -> AsyncGenerator[AsyncClient]:
     transport = ASGITransport(app=test_app)
     async with AsyncClient(transport=transport, base_url="http://0.0.0.0/") as client:
         yield client
-    test_app.container.db_session_maker.reset_override()
+    await test_app.state.dishka_container.close()
 
 
-# User fixtures
-
-
-@pytest.fixture
-def user_repository(session: AsyncSession) -> UserRepository:
-    return UserRepository(session)
-
-
-@pytest.fixture
-def user_service(session: AsyncSession) -> UserService:
-    return UserService(session)
-
-
-@pytest.fixture
-async def sample_user(user_service: UserService) -> UserReadDTO:
-    """Create a sample user for testing."""
-    return await user_service.create_user(
-        UserCreateDTO(email="test@example.com", name="Test User"),
-    )
-
-
-@pytest.fixture
-async def second_sample_user(user_service: UserService) -> UserReadDTO:
-    """Create a second sample user for testing."""
-    return await user_service.create_user(
-        UserCreateDTO(email="test+2@example.com", name="Second Test User"),
-    )
+# Module fixtures - add your module-specific fixtures here
+# Example:
+# @pytest.fixture
+# def user_repository(session: AsyncSession) -> UserRepository:
+#     return UserRepository(session)
