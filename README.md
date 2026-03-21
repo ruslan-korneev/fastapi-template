@@ -1,6 +1,6 @@
 # FastAPI Cookiecutter Template
 
-A production-ready FastAPI project template with SQLAlchemy, dependency injection, Sentry integration, and comprehensive testing setup.
+A production-ready FastAPI project template with SQLAlchemy, Dishka DI, Sentry integration, and comprehensive testing setup.
 
 ## Features
 
@@ -8,7 +8,7 @@ A production-ready FastAPI project template with SQLAlchemy, dependency injectio
 - **SQLAlchemy 2.0** with async sessions and PostgreSQL
 - **Alembic** for database migrations
 - **Pydantic v2** for data validation
-- **Dependency Injector** for IoC/DI container
+- **Dishka** for IoC/DI container
 - **Sentry** for error tracking
 - **Loguru** for structured logging with request ID tracking
 - **Comprehensive testing** with pytest, coverage requirements
@@ -25,7 +25,7 @@ A production-ready FastAPI project template with SQLAlchemy, dependency injectio
 
 ## Requirements
 
-- Python 3.10+
+- Python 3.14+
 - [cookiecutter](https://cookiecutter.readthedocs.io/)
 - [uv](https://docs.astral.sh/uv/) package manager
 
@@ -62,7 +62,7 @@ You'll be prompted for the following options:
 | `author_name` | Your full name | `Your Name` |
 | `author_email` | Your email address | `you@example.com` |
 | `github_username` | GitHub username (for badges) | *(empty)* |
-| `python_version` | Python version | `3.13` |
+| `python_version` | Python version | `3.14` |
 | `ci_platform` | CI/CD platform | `github`, `gitlab`, or `none` |
 | `license` | License type | `MIT`, `Apache-2.0`, `BSD-3-Clause`, or `None` |
 
@@ -76,7 +76,7 @@ project_description [Production-ready FastAPI application]: My awesome API servi
 author_name [Your Name]: John Doe
 author_email [you@example.com]: john@example.com
 github_username []: johndoe
-python_version [3.13]:
+python_version [3.14]:
 Select ci_platform:
 1 - github
 2 - gitlab
@@ -148,12 +148,11 @@ my-project/
 │   ├── config.py          # Application settings
 │   ├── core/              # Application core
 │   │   ├── api/           # Router aggregation
-│   │   ├── dependencies/  # DI setup
+│   │   ├── di/            # Dishka DI providers
 │   │   ├── middleware/    # Request ID, Rate limiting
 │   │   └── types/         # Base types
 │   ├── db/                # Database configuration
 │   └── modules/           # Feature modules
-│       └── users/         # Example CRUD module
 └── tests/                 # Test suite
 ```
 
