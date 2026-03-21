@@ -1,5 +1,9 @@
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from typing import Any
 
+from dishka import make_async_container
+from dishka.integrations.fastapi import setup_dishka
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
@@ -12,13 +16,13 @@ from starlette.middleware.cors import CORSMiddleware
 
 from src.config import settings
 from src.core.api import core_router
-from src.core.dependencies.containers import Container
+from src.core.di import AppProvider, RequestProvider
 from src.core.exceptions import AppError
 from src.core.middleware import InMemoryRateLimiter, RateLimitMiddleware, RequestIDMiddleware
 
 
 class FastAPIWrapper(FastAPI):
-    container: Container
+    pass
 
 
 def _get_request_id(request: Request) -> str | None:
@@ -82,9 +86,13 @@ async def generic_exception_handler(request: Request, exc: Exception) -> JSONRes
     )
 
 
-def get_app() -> FastAPIWrapper:
-    container = Container()
+@asynccontextmanager
+async def _lifespan(app: FastAPI) -> AsyncIterator[None]:
+    yield
+    await app.state.dishka_container.close()
 
+
+def get_app() -> FastAPIWrapper:
     if sentry_dsn := settings.sentry.dsn.get_secret_value():
         sentry_init(
             dsn=sentry_dsn,
@@ -104,8 +112,12 @@ def get_app() -> FastAPIWrapper:
         title=settings.project_title,
         description=settings.project_description,
         version="2.0.0",
+        lifespan=_lifespan,
     )
-    app.container = container
+
+    # Dishka DI container
+    container = make_async_container(AppProvider(), RequestProvider())
+    setup_dishka(container, app)
 
     # Register exception handlers
     app.add_exception_handler(AppError, app_exception_handler)  # type: ignore[arg-type]

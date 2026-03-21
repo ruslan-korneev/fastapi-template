@@ -1,13 +1,12 @@
-FROM python:3.13.5-slim-bullseye
+FROM python:3.14.3-slim-trixie
 
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
-      build-essential=12.9 \
-      libffi-dev=3.3-6 \
+      build-essential=12.12 \
+      libffi-dev=3.4.8-2 \
  && rm -rf /var/lib/apt/lists/*
 
-
-COPY --from=ghcr.io/astral-sh/uv:0.9.2 /uv /uvx /bin/
+COPY --from=ghcr.io/astral-sh/uv:0.10.12 /uv /uvx /bin/
 
 COPY . /app
 WORKDIR /app

@@ -1,8 +1,4 @@
-from typing import Generic, TypeVar
-
 from pydantic import BaseModel, ConfigDict
-
-T = TypeVar("T", bound="BaseDTO")
 
 
 class BaseDTO(BaseModel):
@@ -12,7 +8,7 @@ class BaseDTO(BaseModel):
     )
 
 
-class PaginatedResponse(BaseModel, Generic[T]):
+class PaginatedResponse[T: "BaseDTO"](BaseModel):
     """Generic paginated response wrapper."""
 
     items: list[T]

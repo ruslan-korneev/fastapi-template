@@ -4,7 +4,9 @@ from fastapi import status
 
 __all__ = (
     "AppError",
+    "AuthenticationError",
     "ConflictError",
+    "ForbiddenError",
     "NotFoundError",
     "RateLimitExceededError",
     "ValidationError",
@@ -21,6 +23,20 @@ class AppError(Exception):
         self.detail = detail or self.__class__.detail
         self.extra = kwargs
         super().__init__(self.detail)
+
+
+class AuthenticationError(AppError):
+    """Authentication required exception."""
+
+    status_code = status.HTTP_401_UNAUTHORIZED
+    detail = "Authentication required"
+
+
+class ForbiddenError(AppError):
+    """Access denied exception."""
+
+    status_code = status.HTTP_403_FORBIDDEN
+    detail = "Access denied"
 
 
 class NotFoundError(AppError):
